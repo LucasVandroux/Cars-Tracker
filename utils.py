@@ -37,7 +37,7 @@ class SimpleObjectDetector:
             )
 
     def initializeBackground(
-        self, video_path:str, num_frames_for_initialization: int = 200
+        self, video_path: str, num_frames_for_initialization: int = 200
     ):
         """ Initialize the background image used by the background substracor algorithm
 
@@ -210,6 +210,7 @@ def updateVehicles(list_vehicles, list_detections):
 
     return list_vehicles, list_detections
 
+
 BoundingBox = namedtuple("BoundingBox", "x y w h")
 # where (x,y) are the coordinates of the top-left corner of the bounding box and w its width and h its height in pixels.
 
@@ -220,6 +221,7 @@ class VehicleTracker:
     Class responsible to track each vehicle individually.
 
     """
+
     def __init__(self, x: int, y: int, w: int, h: int):
         """ Initialize the Vehicle Tracker
 
@@ -295,14 +297,14 @@ class VehicleTracker:
         centroid_y = int(bbox.y + (bbox.h / 2))
         return (centroid_x, centroid_y)
 
-    def drawOnFrame(self, frame, color = (0, 255, 0)):
+    def drawOnFrame(self, frame, color=(0, 255, 0)):
         """ Draw the bbox and the previous centroid on an image
 
         Args:
             frame (np.array): image to draw the bbox and the previous centroid on.
             color ((B:int, G:int, R:int)): BGR values for the color to draw with.
         """
-        # Draw the centroids 
+        # Draw the centroids
         for idx, centroid in enumerate(self.list_centroids):
             cv2.circle(frame, centroid, 2, color, -1)
 
