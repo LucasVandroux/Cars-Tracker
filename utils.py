@@ -1,4 +1,5 @@
 from collections import namedtuple
+import uuid
 
 import cv2
 import numpy as np
@@ -37,7 +38,7 @@ class SimpleObjectDetector:
             )
 
     def initializeBackground(
-        self, video_path: str, num_frames_for_initialization: int = 200
+        self, video_path: str, num_frames_for_initialization: int = 200, side: str = "all"
     ):
         """ Initialize the background image used by the background substracor algorithm
 
@@ -49,6 +50,7 @@ class SimpleObjectDetector:
                 initialized on.
             num_frames_for_initialization (int: 200): number of frames to use for the 
             initialization.
+            side (str: "all"): side of the image that will be analyzed
 
         Returns:
             (bool): True if the initialization was successful or False otherwise.
@@ -74,6 +76,15 @@ class SimpleObjectDetector:
 
             # If the frame was captured correctly
             if ret:
+                # Find the middle of the frame
+                middle_frame = int(frame.shape[1] / 2)
+                
+                # Black out the side that is not observed
+                if side == "left":
+                    frame[:, middle_frame:, ::] = 0
+                elif side == "right":
+                    frame[:, :middle_frame, ::] = 0
+
                 # Blur the frame the same way as the detect function
                 frame_blurred = cv2.GaussianBlur(frame, (5, 5), 0)
 
@@ -236,6 +247,8 @@ class VehicleTracker:
         self.list_centroids = []
         # Update the current bbox and the list of centroids
         self.updateBbox(x, y, w, h)
+        # Define a unique id for this tracker
+        self.id = str(uuid.uuid1())
 
     def computeIouWith(self, bbox, min_iou=0.5):
         """ Compute the IoU
