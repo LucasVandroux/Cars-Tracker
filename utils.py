@@ -10,25 +10,25 @@ class SimpleObjectDetector:
     """ Simple object detector for a static camera
 
     Simple object detector returning a list of bounding boxes of objects 
-    that have been detected using a background substraction algorithm.
+    that have been detected using a background subtraction algorithm.
     """
 
     def __init__(
-        self, background_substractor_algo: str = "KNN", min_contour_area: int = 250,
+        self, background_subtractor_algo: str = "KNN", min_contour_area: int = 250,
     ):
         """ Constructor for the SimpleObjectDetector
         
         Args:
-            background_substractor_algo (str: "KNN"): background substraction algorithm to use      
+            background_subtractor_algo (str: "KNN"): background subtraction algorithm to use      
                 (MOG2 or KNN). More info here: 
                 https://docs.opencv.org/3.4/d1/dc5/tutorial_background_subtraction.html
-            min_contour_area (int: 250): minimum area of the bounding boxes of an object to be 
+            min_contour_area (int: 250): minimum area of the contour of an object to be 
                 detected.
         """
         self.min_contour_area = min_contour_area
 
-        # Set the background substractor algoritm
-        if background_substractor_algo == "MOG2":
+        # Set the background subtractor algoritm
+        if background_subtractor_algo == "MOG2":
             self.background_subtractor = cv2.createBackgroundSubtractorMOG2(
                 detectShadows=True
             )
@@ -40,33 +40,34 @@ class SimpleObjectDetector:
     def initializeBackground(
         self, video_path: str, num_frames_for_initialization: int = 200, side: str = "all"
     ):
-        """ Initialize the background image used by the background substracor algorithm
+        """ Initialize the background image used by the background subtracor algorithm
 
         It is not required to use it but it can improve the detection performances in the first 
         frames of a new video.
 
         Args:
-            video_path (str): path to the video the background substractor algorithm should be 
+            video_path (str): path to the video the background subtractor algorithm should be 
                 initialized on.
             num_frames_for_initialization (int: 200): number of frames to use for the 
-            initialization.
+                initialization.
             side (str: "all"): side of the image that will be analyzed
 
         Returns:
             (bool): True if the initialization was successful or False otherwise.
 
         """
+        print(f"Initialization of the SimpleObjectDetector...")
+
         # Create a VideoCapture object
         capture = cv2.VideoCapture(video_path)
 
         # Check if the VideoCapture was created correctly.
         if not capture.isOpened():
             print(
-                f"Failed to open the video file '{video_path}' during the initialization of the SimpleObjectDetector."
+                f"Failed to open the video file '{video_path}' during the initialization."
             )
             return False
 
-        print(f"Initialization of the SimpleObjectDetector...")
         # Initialize the progress bar
         pbar = tqdm(total=num_frames_for_initialization)
 
@@ -98,8 +99,9 @@ class SimpleObjectDetector:
             else:
                 # Terminate the progress bar
                 pbar.close()
+                frame_index = capture.get(cv2.CAP_PROP_POS_FRAMES)
                 print(
-                    f"Failed to finished the initialization of the SimpleObjectDetector (Exited on frame number: {cv2.CAP_PROP_POS_FRAMES})."
+                    f"Failed to finished the initialization (Exited on frame: {frame_index})."
                 )
                 return False
 
@@ -115,14 +117,17 @@ class SimpleObjectDetector:
             frame(np.array): frame from OpenCV where the detection needs to be performed.
 
         Returns:
-            list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes of the detected objects. A bounding boxe is a tuple (x, y, w, h) where (x,y) are the coordinates of the top-left corner of the bounding box and w its width and h its height in pixels.
+            list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes of the 
+                detected objects. A bounding boxe is a tuple (x, y, w, h) where (x,y) are the   
+                coordinates of the top-left corner of the bounding box and w its width and h its 
+                    height in pixels.
             foreground_mask_ (np.array): binary mask used to detect the objects.
         """
         # --- PRE-PROCESSING ---
         # Blur the frame
         frame_blurred = cv2.GaussianBlur(frame, (5, 5), 0)
 
-        # Use the background substractor to extract the foreground
+        # Use the background subtractor to extract the foreground
         foreground_mask = self.background_subtractor.apply(frame_blurred)
 
         # Remove the shadows from the foreground
@@ -131,7 +136,7 @@ class SimpleObjectDetector:
         # Edges detection
         edges = cv2.Canny(foreground_mask, 100, 200)
 
-        # Open operation to remove the small detection
+        # Open operation to remove the small detections
         foreground_mask_ = cv2.erode(foreground_mask, None, iterations=1)
         foreground_mask_ = cv2.dilate(foreground_mask_, None, iterations=1)
 
@@ -170,13 +175,17 @@ def updateVehicles(list_vehicles, list_detections):
 
     Args:
         list_vehicles (list[VehicleTracker]): list of VehicleTracker objects
-        list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes. A bounding boxe is a tuple (x, y, w, h) where (x,y) are the coordinates of the top-left corner of the bounding box and w its width and h its height in pixels.
+        list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes. A bounding 
+            boxe is a tuple (x, y, w, h) where (x,y) are the coordinates of the top-left corner of  
+            the bounding box and w its width and h its height in pixels.
 
     Returns:
-        list_vehicles (list[VehicleTracker]): list of VehicleTracker that could be match with a new boudning box. Return the input list_vehicles if no matching is needed.
-        list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes that haven't been matched to a vehicle.
+        list_vehicles (list[VehicleTracker]): list of VehicleTracker that could be matched with a 
+            new boudning box. Return the input list_vehicles if no matching is needed.
+        list_detections (list[(x: int, y:int, w:int, h:int)]): list of bounding boxes that haven't 
+            been matched to a vehicle.
     """
-    # Initialize the array to store of the Intersection Over Union (IoU) between the bounding boxes
+    # Initialize the array to store the Intersection Over Union (IoU) between the bounding boxes
     # of the vehicles and the new detections.
     iou_vehicles_detections = np.zeros([len(list_vehicles), len(list_detections)])
 
@@ -221,16 +230,14 @@ def updateVehicles(list_vehicles, list_detections):
 
     return list_vehicles, list_detections
 
-
 BoundingBox = namedtuple("BoundingBox", "x y w h")
-# where (x,y) are the coordinates of the top-left corner of the bounding box and w its width and h its height in pixels.
-
+# where (x,y) are the coordinates of the top-left corner of the bounding box 
+# and w its width and h its height in pixels.
 
 class VehicleTracker:
     """ Vehicle Tracker
 
     Class responsible to track each vehicle individually.
-
     """
 
     def __init__(self, x: int, y: int, w: int, h: int):
@@ -243,26 +250,31 @@ class VehicleTracker:
             h (int): height of the inital bbox containing the vehicle
 
         """
-        # Initialize the list of centroids of the bboxes
+        # Initialize the list of centroids of bboxes
         self.list_centroids = []
         # Update the current bbox and the list of centroids
         self.updateBbox(x, y, w, h)
-        # Define a unique id for this tracker
-        self.id = str(uuid.uuid1())
+        # Define a unique id for this tracker by taking the first 8 character of the uuid
+        self.id = str(uuid.uuid1())[:8]
 
     def computeIouWith(self, bbox, min_iou=0.5):
         """ Compute the IoU
 
-        Compute the Intersection Over Union (IoU) between the current bounding box containing the vehicle and another bounding box.
+        Compute the Intersection Over Union (IoU) between the current bounding box containing the 
+        vehicle and another bounding box.
 
         Args:
-            bbox ((x: int, y:int, w:int, h:int)): Bounding to calculate the IoU with the current bbox of the vehicle. A bounding boxe is a tuple (x, y, w, h) where (x,y) are the coordinates of the top-left corner of the bounding box and w its width and h its height in pixels.
-            min_iou (int: 0.5): minimum under which a the value of the IoU will be set to 0
+            bbox ((x: int, y:int, w:int, h:int)): Bounding box to calculate the IoU with the 
+                current bbox of the vehicle. A bounding boxe is a tuple (x, y, w, h) where (x,y) 
+                are the coordinates of the top-left corner of the bounding box and w its width and 
+                h its height in pixels.
+            min_iou (int: 0.5): minimum under which the value of the IoU will be set to 0.
 
         Returns:
             iou (float): value of the Intersection over Union between the current bbox of the vehicle and the bbox given as an input.
 
         """
+        # Extract bbox parameters from the input
         bbox_x, bbox_y, bbox_w, bbox_h = bbox
         bbox_area = bbox_w * bbox_h
 
@@ -272,7 +284,7 @@ class VehicleTracker:
         xx2 = np.minimum(self.bbox.x + self.bbox.w, bbox_x + bbox_w)
         yy2 = np.minimum(self.bbox.y + self.bbox.h, bbox_y + bbox_h)
 
-        # compute are of the intersection
+        # compute area of the intersection
         intersection = np.maximum(0, xx2 - xx1) * np.maximum(0, yy2 - yy1)
 
         # compute the IoU
@@ -301,7 +313,7 @@ class VehicleTracker:
         """ Compute the center of a bounding box
 
         Args:
-            bbox (BoundingBox): bounding box to compute the center from
+            bbox (BoundingBox): bounding box to compute the center of.
 
         Returns:
             (centroid_x, centroid_y) ((int, int)): tuple containing the coordinates of the centroid
@@ -311,10 +323,10 @@ class VehicleTracker:
         return (centroid_x, centroid_y)
 
     def drawOnFrame(self, frame, color=(0, 255, 0)):
-        """ Draw the bbox and the previous centroid on an image
+        """ Draw the bbox and the previous centroids on an image
 
         Args:
-            frame (np.array): image to draw the bbox and the previous centroid on.
+            frame (np.array): image to draw the bbox and the previous centroids on.
             color ((B:int, G:int, R:int)): BGR values for the color to draw with.
         """
         # Draw the centroids
