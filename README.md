@@ -4,16 +4,16 @@
 
 1. [Installation](https://github.com/LucasVandroux/Interview-Huawei-London#installation)
 2. [Usage](https://github.com/LucasVandroux/Interview-Huawei-London#usage)
-3. [Vehicle Tracker](https://github.com/LucasVandroux/Interview-Huawei-London#vehicletracker)
+3. [Vehicle Tracker](https://github.com/LucasVandroux/Interview-Huawei-London#vehicle-tracker)
 4. [Outlook](https://github.com/LucasVandroux/Interview-Huawei-London#outlook)
 
 </p></details><p></p>
 
 In this repository, we are proposing a simple vehicle tracker for static cameras that requires minimum computation power and no prior training of the algorithms used as it relies solely on traditional computer vision methods.
 
-![Demo of the Vehicles Tracking](images/vehicles_tracker_demo.gif "Demo of the Vehicles Tracking")
+![Demo of the Vehicle Tracking](images/vehicles_tracker_demo.gif "Demo of the Vehicle Tracking")
 
-_Demo of the Vehicles Tracking on the right track._
+_Demo of the tracker, tracking vehicles on the right track._
 
 ## Installation
 
