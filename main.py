@@ -77,6 +77,10 @@ if __name__ == "__main__":
     print(f"------------- VEHICLES TRACKING -------------")
     print(f" -> Press 'ESC' to quit")
 
+    # Write the header for the outputs written in terminal
+    if args.write_outputs:
+        print(f"index_frame, tracker_id, bbox_x, bbox_y, bbox_w, bbox_h")
+
     # Start the capture loop
     while capture.isOpened():
         ret, frame = capture.read()
@@ -113,7 +117,7 @@ if __name__ == "__main__":
                 # 'current frame', 'unique tracker identifier', 'bbox x', 'bbox y', 'bbox width', 
                 # 'bbox height'
                 if args.write_outputs:
-                    print(f"{index_frame}, {vehicle.id}, {vehicle.bbox.x}, {vehicle.bbox.y}, {vehicle.bbox.w}, {vehicle.bbox.h}")
+                    print(f"{index_frame:0.0f}, {vehicle.id}, {vehicle.bbox.x}, {vehicle.bbox.y}, {vehicle.bbox.w}, {vehicle.bbox.h}")
             
             # Print the index_frame, observed side and number of vehicle in the current frame
             cv2.rectangle(frame, (10, 2), (200,20), (255,255,255), -1)
