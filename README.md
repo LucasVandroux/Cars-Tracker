@@ -48,6 +48,35 @@ To get the analysis on one specific side of the road and have all the detections
 ```
 python main.py --write_outputs --side right
 ```
+
+### Outputs
+
+If the flag `--write_outputs` is used, the trackers' information will be written frame by frame in the terminal. It uses the [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) format with the following columns:
+1. `index_frame`: Index of the frame the detection has been made on.
+2. `tracker_id`: Unique identifier for the tracker of a specific vehicle.
+3. `bbox_x`: x coordinate of the top-left corner of the bounding box containing the vehicle
+4. `bbox_y`: y coordinate of the top-left corner of the bounding box containing the vehicle
+5. `bbox_w`: width in pixels of the bounding box containing the vehicle. 
+6. `bbox_h`: height in pixels of the bounding box containing the vehicle.
+
+#### Example:
+```
+index_frame, tracker_id, bbox_x, bbox_y, bbox_w, bbox_h
+1, f74adaf2, 552, 276, 23, 17
+1, f74ade4e, 515, 242, 56, 48
+1, f74ae092, 430, 215, 35, 35
+1, f74ae286, 367, 199, 31, 30
+1, f74ae452, 337, 150, 16, 15
+1, f74ae600, 373, 133, 35, 32
+2, f74adaf2, 552, 276, 23, 17
+2, f74ade4e, 515, 242, 56, 48
+2, f74ae092, 430, 215, 35, 35
+2, f74ae286, 367, 199, 31, 30
+2, f74ae452, 337, 150, 16, 15
+2, f74ae600, 373, 133, 35, 32
+...
+```
+
 ## Vehicle Tracker
 The vehicle tracker implemented in this repository can be divided into two main components, an object detector, and a tracking method.
 
